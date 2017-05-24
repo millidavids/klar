@@ -84,7 +84,7 @@ func TestAnalyse(t *testing.T) {
 	}
 
 	c := NewClair(ts.URL)
-	vs := c.Analyse(dockerImage)
+	vs, err := c.Analyse(dockerImage)
 	if len(vs) != 1 {
 		t.Fatalf("Expected 1 vulnerability, got %d", len(vs))
 	}

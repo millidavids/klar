@@ -103,14 +103,14 @@ func filterEmptyLayers(fsLayers []docker.FsLayer) (filteredLayers []docker.FsLay
 
 // Analyse sent each layer from Docker image to Clair and returns
 // a list of found vulnerabilities
-func (c *Clair) Analyse(image *docker.Image) []Vulnerability {
+func (c *Clair) Analyse(image *docker.Image) ([]Vulnerability, error) {
 	// Filter the empty layers in image
 	image.FsLayers = filterEmptyLayers(image.FsLayers)
 	layerLength := len(image.FsLayers)
 	if layerLength == 0 {
 		fmt.Printf("No need to analyse image %s/%s:%s as there is no non-emtpy layer",
 			image.Registry, image.Name, image.Tag)
-		return nil
+		return nil, nil
 	}
 
 	var vs []Vulnerability
@@ -125,11 +125,10 @@ func (c *Clair) Analyse(image *docker.Image) []Vulnerability {
 
 	vs, err := c.analyzeLayer(image.FsLayers[0])
 	if err != nil {
-		fmt.Printf("Analyse image %s/%s:%s failed: %s", image.Registry, image.Name, image.Tag, err.Error())
-		return nil
+		return nil, fmt.Errorf("Analyse image %s/%s:%s failed: %s", image.Registry, image.Name, image.Tag, err.Error())
 	}
 
-	return vs
+	return vs, nil
 }
 
 func (c *Clair) analyzeLayer(layer docker.FsLayer) ([]Vulnerability, error) {

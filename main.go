@@ -95,7 +95,10 @@ func main() {
 	}
 
 	c := clair.NewClair(clairAddr)
-	vs := c.Analyse(image)
+	vs, err := c.Analyse(image)
+    if err != nil {
+        os.Exit(1)
+    }
 	groupBySeverity(vs)
 	highSevNumber := len(store["High"]) + len(store["Critical"]) + len(store["Defcon1"])
 
